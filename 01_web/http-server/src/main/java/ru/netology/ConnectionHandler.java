@@ -7,7 +7,6 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.LocalDateTime;
 
 public class ConnectionHandler implements java.io.Closeable, Runnable {
 
@@ -45,8 +44,22 @@ public class ConnectionHandler implements java.io.Closeable, Runnable {
                 close();
             }
 
-            final var path = parts[1];
-            if (!Server.validPaths.contains(path)) {
+            var request = new Request(parts[0], parts[1]);
+
+            Server.requestHandlers.forEach((pathKey, handler) -> {
+                pathKey.forEach((method, path) -> {
+                    if (method.equals(request.getMethod()) && path.equals(request.getPath())) {
+                        try {
+                            handler.handle(request, out);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                });
+            });
+
+
+            if (!Server.validPaths.contains(request.getPath())) {
                 out.write((
                         "HTTP/1.1 404 Not Found\r\n" +
                                 "Content-Length: 0\r\n" +
@@ -56,26 +69,8 @@ public class ConnectionHandler implements java.io.Closeable, Runnable {
                 out.flush();
             }
 
-            final var filePath = Path.of(".", "public", path);
+            final var filePath = Path.of(".", "public", request.getPath());
             final var mimeType = Files.probeContentType(filePath);
-
-            // special case for classic
-            if (path.equals("/classic.html")) {
-                final var template = Files.readString(filePath);
-                final var content = template.replace(
-                        "{time}",
-                        LocalDateTime.now().toString()
-                ).getBytes();
-                out.write((
-                        "HTTP/1.1 200 OK\r\n" +
-                                "Content-Type: " + mimeType + "\r\n" +
-                                "Content-Length: " + content.length + "\r\n" +
-                                "Connection: close\r\n" +
-                                "\r\n"
-                ).getBytes());
-                out.write(content);
-                out.flush();
-            }
 
             final var length = Files.size(filePath);
             out.write((
