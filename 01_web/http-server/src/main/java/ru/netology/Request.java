@@ -1,21 +1,32 @@
 package ru.netology;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
+
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+
 public class Request {
 
-    private String method;
+    private final String method;
 
-    private String path;
+    private final URI uri;
 
-    public String getPath() {
-        return path;
+    public URI getUri() {
+        return uri;
     }
 
     public String getMethod() {
         return method;
     }
 
-    public Request(String method, String path) {
+    public Request(String method, URI uri) {
         this.method = method;
-        this.path = path;
+        this.uri = uri;
+    }
+
+    public List<NameValuePair> getQueryParams() {
+        return URLEncodedUtils.parse(uri, StandardCharsets.UTF_8);
     }
 }

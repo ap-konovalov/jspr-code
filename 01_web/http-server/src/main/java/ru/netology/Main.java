@@ -5,10 +5,11 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 
 // https://github.com/netology-code/jspr-homeworks/tree/master/01_web
+// https://github.com/netology-code/jspr-homeworks/tree/master/02_forms
 public class Main {
     public static void main(String[] args) {
         Server.addHandler("GET", "/classic.html", (request, out) -> {
-                    final var filePath = Path.of(".", "public", request.getPath());
+                    final var filePath = Path.of(".", "public", request.getUri().getPath());
                     final var mimeType = Files.probeContentType(filePath);
 
                     final var template = Files.readString(filePath);
