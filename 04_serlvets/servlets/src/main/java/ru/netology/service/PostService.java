@@ -17,15 +17,15 @@ public class PostService {
     return repository.all();
   }
 
-  public Post getById(long id) {
+  public Post getById(int id) {
     return repository.getById(id).orElseThrow(NotFoundException::new);
   }
 
-  public Post save(Post post) {
+  public Post save(Post post) throws IllegalArgumentException {
     return repository.save(post);
   }
 
-  public void removeById(long id) {
+  public void removeById(int id) {
     repository.removeById(id);
   }
 }
