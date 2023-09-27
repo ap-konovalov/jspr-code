@@ -5,6 +5,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -40,26 +41,22 @@ public class ConnectionHandler implements java.io.Closeable, Runnable {
             final var parts = requestLine.split(" ");
 
             if (parts.length != 3) {
-                // just close socket
                 close();
             }
 
-            var request = new Request(parts[0], parts[1]);
+            var request = new Request(parts[0], URI.create(parts[1]));
 
-            Server.requestHandlers.forEach((pathKey, handler) -> {
-                pathKey.forEach((method, path) -> {
-                    if (method.equals(request.getMethod()) && path.equals(request.getPath())) {
-                        try {
-                            handler.handle(request, out);
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
+            Server.requestHandlers.forEach((pathKey, handler) -> pathKey.forEach((method, absPath) -> {
+                if (method.equals(request.getMethod()) && absPath.equals(request.getUri().getPath())) {
+                    try {
+                        handler.handle(request, out);
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
-                });
-            });
+                }
+            }));
 
-
-            if (!Server.validPaths.contains(request.getPath())) {
+            if (!Server.validPaths.contains(request.getUri().getPath())) {
                 out.write((
                         "HTTP/1.1 404 Not Found\r\n" +
                                 "Content-Length: 0\r\n" +
@@ -69,7 +66,7 @@ public class ConnectionHandler implements java.io.Closeable, Runnable {
                 out.flush();
             }
 
-            final var filePath = Path.of(".", "public", request.getPath());
+            final var filePath = Path.of(".", "public", request.getUri().getPath());
             final var mimeType = Files.probeContentType(filePath);
 
             final var length = Files.size(filePath);
