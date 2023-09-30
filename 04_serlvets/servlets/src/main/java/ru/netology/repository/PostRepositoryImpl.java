@@ -1,13 +1,11 @@
 package ru.netology.repository;
 
-import org.springframework.stereotype.Repository;
 import ru.netology.model.Post;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@Repository
-public class PostRepositoryImpl implements  PostRepository {
+public class PostRepositoryImpl implements PostRepository {
 
     private static final AtomicInteger currentId = new AtomicInteger(0);
 
