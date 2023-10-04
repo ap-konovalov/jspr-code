@@ -1,5 +1,6 @@
 package ru.netology.config;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
@@ -13,5 +14,10 @@ public class WebConfig {
         final var bean = new RequestMappingHandlerAdapter();
         bean.getMessageConverters().add(new GsonHttpMessageConverter());
         return bean;
+    }
+
+    @Bean
+    public ModelMapper modelMapper() {
+        return new ModelMapper();
     }
 }

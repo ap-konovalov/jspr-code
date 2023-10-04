@@ -1,13 +1,13 @@
 package ru.netology.model;
 
-public class Post {
+public class PostDto {
     private int id;
     private String content;
 
-    public Post() {
+    public PostDto() {
     }
 
-    public Post(int id, String content) {
+    public PostDto(int id, String content) {
         this.id = id;
         this.content = content;
     }
